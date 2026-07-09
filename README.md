@@ -1,5 +1,8 @@
 # India E-commerce MCP Server (Spring AI)
 
+[![Build and Publish Docker image](https://github.com/vuppalapatisn/MCPeCommerce/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/vuppalapatisn/MCPeCommerce/actions/workflows/docker-publish.yml)
+[![Docker Hub](https://img.shields.io/docker/v/sudhavuppalapati/mcp-ecommerce-server?label=docker%20hub&logo=docker&sort=semver)](https://hub.docker.com/r/sudhavuppalapati/mcp-ecommerce-server)
+
 A remote MCP server, built with Spring AI + Spring Boot, that exposes tools for:
 - Searching a product across Amazon.in, Flipkart, Myntra, and Meesho
 - Reading current price / rating / rating count for a specific product page
