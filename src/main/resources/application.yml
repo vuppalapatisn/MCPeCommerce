@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: ecommerce-mcp-server
+
+  ai:
+    mcp:
+      server:
+        name: india-ecommerce-mcp-server
+        version: 1.0.0
+        type: SYNC
+        protocol: STREAMABLE      # Streamable HTTP - required for remote/claude.ai usage
+        transport:
+          streamable-http:
+            path: /mcp            # Full URL to register in Claude: https://your-host/mcp
+        instructions: >
+          Tools for searching products across Indian e-commerce sites (Amazon.in, Flipkart,
+          Myntra, Meesho), reading current price and rating, and viewing tracked price history.
+
+  # Swap to Postgres in production - see README
+  datasource:
+    url: jdbc:h2:file:./data/ecom-mcp;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+
+
+# Custom scraper settings
+ecom:
+  scraper:
+    request-timeout-ms: 8000
+    user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+    # How often to re-scrape tracked products to build price history
+    tracking-interval-cron: "0 0 */6 * * *"   # every 6 hours
+
+logging:
+  level:
+    com.example.ecomserver: INFO
