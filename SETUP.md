@@ -148,11 +148,32 @@ Equivalent `.mcp.json`:
 }
 ```
 
+### Deploy to a public URL (Render) — browser only, no local tools
+
+A GitHub repo is just source; it does not run a server. To use this from
+claude.ai (or from Claude Code without running it locally), deploy it to a host
+that gives a public HTTPS URL. This repo ships a `render.yaml` Blueprint:
+
+1. Sign in at <https://dashboard.render.com>.
+2. **New + → Blueprint →** select the `vuppalapatisn/MCPeCommerce` repo. Render
+   reads `render.yaml`, builds the `Dockerfile`, and deploys it.
+3. When it's live you get a URL like `https://mcp-ecommerce-server-xxxx.onrender.com`.
+   Your MCP endpoint is that URL **+ `/mcp`**.
+4. `autoDeploy` is on, so every push to `main` redeploys automatically.
+
+Notes:
+- The **free** instance sleeps after ~15 min idle; the first request after that
+  cold-starts (~30–60 s), so a first connection from Claude may need a retry.
+- The free filesystem is ephemeral (H2 data resets on restart) — see the
+  commented Postgres block in `render.yaml` for durable history.
+- The endpoint is **public and unauthenticated** by default — anyone with the
+  URL can call the tools. Add auth before relying on it (see below).
+
 ### claude.ai (custom connector)
 
 Custom connectors connect from Anthropic's cloud, **not** your machine, so
-`localhost` will not work. Deploy the app to a **public HTTPS** URL first
-(Render, Fly.io, Railway, or a VPS behind a TLS reverse proxy). Then:
+`localhost` will not work. Deploy to a **public HTTPS** URL first (Render above,
+or Fly.io / Railway / a VPS behind TLS). Then:
 
 **Settings → Connectors → Add custom connector** → URL `https://your-host/mcp`.
 

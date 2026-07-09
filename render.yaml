@@ -1,0 +1,38 @@
+# Render Blueprint — deploys this repo as a public HTTPS MCP server.
+# Render builds the Dockerfile in this repo, exposes it over HTTPS, and (with
+# autoDeploy) rebuilds on every push to the connected branch.
+# Blueprint reference: https://render.com/docs/blueprint-spec
+#
+# To deploy: push this file, then on https://dashboard.render.com click
+# "New +" -> "Blueprint" and select the vuppalapatisn/MCPeCommerce repo.
+# Your MCP endpoint will be:  https://<service-name>.onrender.com/mcp
+
+services:
+  - type: web
+    name: mcp-ecommerce-server
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free                 # free instances sleep after ~15 min idle (cold start on next hit)
+    region: singapore          # closest Render region to India; change if you prefer
+    healthCheckPath: /actuator/health
+    autoDeploy: true           # redeploy automatically on every push to main
+    envVars:
+      - key: SERVER_PORT       # Spring Boot binds here; matches Render's default routed port
+        value: "10000"
+
+      # --- Persistent Postgres (optional) ---------------------------------
+      # The free instance's filesystem is ephemeral, so the default H2 file DB
+      # resets whenever the instance restarts/wakes. For durable price history,
+      # create a Render Postgres (New + -> PostgreSQL), then uncomment these and
+      # paste values from its "Internal Database URL" (add the jdbc: prefix):
+      #
+      # - key: SPRING_DATASOURCE_URL
+      #   value: jdbc:postgresql://<host>:<port>/<database>
+      # - key: SPRING_DATASOURCE_USERNAME
+      #   value: <user>
+      # - key: SPRING_DATASOURCE_PASSWORD
+      #   value: <password>
+      # - key: SPRING_DATASOURCE_DRIVER_CLASS_NAME
+      #   value: org.postgresql.Driver
+      # - key: SPRING_JPA_HIBERNATE_DDL_AUTO
+      #   value: update
