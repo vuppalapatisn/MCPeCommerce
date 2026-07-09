@@ -20,12 +20,16 @@ services:
       - key: SERVER_PORT       # Spring Boot binds here; matches Render's default routed port
         value: "10000"
 
-      # Shared secret that protects the /mcp endpoint. generateValue makes Render
-      # create a random value on first deploy; read it in the dashboard
-      # (service -> Environment) and give it to your MCP client. Remove this block
-      # to leave the endpoint unauthenticated.
-      - key: ECOM_SECURITY_API_KEY
-        generateValue: true
+      # Auth is OFF by default so the endpoint works as a Claude Desktop / claude.ai
+      # "Custom Connector" (those connect over the browser's OAuth flow and cannot
+      # send a static API key). The endpoint is therefore PUBLIC — fine for personal
+      # testing, but don't share the URL.
+      #
+      # If instead you connect from Claude Code (which CAN send a header via
+      # `--header "Authorization: Bearer <key>"`), uncomment this to require a key.
+      # Render will generate a random value; read it under service -> Environment.
+      # - key: ECOM_SECURITY_API_KEY
+      #   generateValue: true
 
       # --- Persistent Postgres (optional) ---------------------------------
       # The free instance's filesystem is ephemeral, so the default H2 file DB
