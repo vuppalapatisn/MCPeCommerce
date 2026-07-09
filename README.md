@@ -96,6 +96,26 @@ Test it with the MCP Inspector:
 npx @modelcontextprotocol/inspector
 ```
 
+### REST API + Swagger UI
+
+The same capabilities are also exposed as a plain REST API for browser/HTTP clients:
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI spec: `http://localhost:8080/v3/api-docs`
+
+Endpoints (all under `/api`): `GET /api/search`, `GET /api/product`,
+`GET /api/price-history/{site}/{productId}`, `GET /api/tracked`, `GET /api/sites`.
+
+When `ECOM_SECURITY_API_KEY` is set, the `/api/**` endpoints require the key — click
+**Authorize** in Swagger UI and paste it. (The Swagger UI and `/v3/api-docs` pages
+themselves stay reachable so the docs can render.)
+
+> **Behind a corporate TLS-inspection proxy?** Live scrapes may fail with
+> `PKIX path building failed`. The correct fix is to import your corporate root CA into
+> the JVM truststore. For a quick local demo on a trusted network only, you can set
+> `ECOM_SCRAPER_INSECURE_TLS=true` to disable certificate validation for scraping —
+> **never enable this in production.**
+
 ## Running tests
 
 ```bash

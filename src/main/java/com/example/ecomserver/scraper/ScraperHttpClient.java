@@ -8,7 +8,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.security.cert.X509Certificate;
 
 /**
  * Thin wrapper around Jsoup with headers that make requests look like a normal browser.
@@ -32,6 +38,18 @@ public class ScraperHttpClient {
     @Value("${ecom.scraper.user-agent}")
     private String userAgent;
 
+    /**
+     * DEV ONLY. When true, the client trusts ALL TLS certificates, bypassing validation.
+     * Use this only to work around a corporate TLS-inspection proxy on a trusted network
+     * for local demos; it defeats HTTPS protection against man-in-the-middle attacks and
+     * must never be enabled in production. Prefer importing the corporate root CA into the
+     * JVM truststore instead.
+     */
+    @Value("${ecom.scraper.insecure-tls:false}")
+    private boolean insecureTls;
+
+    private SSLSocketFactory trustAllSocketFactory;
+
     public Document get(String url) throws IOException {
         Connection connection = Jsoup.connect(url)
                 .userAgent(userAgent)
@@ -40,8 +58,32 @@ public class ScraperHttpClient {
                 .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                 .followRedirects(true)
                 .ignoreHttpErrors(true);
+        if (insecureTls) {
+            connection.sslSocketFactory(trustAllSocketFactory());
+        }
         Document doc = connection.get();
         log.debug("Fetched {} ({} bytes)", url, doc.html().length());
         return doc;
+    }
+
+    /** Lazily builds (and caches) a trust-everything SSL socket factory. Dev-only, see {@link #insecureTls}. */
+    private synchronized SSLSocketFactory trustAllSocketFactory() {
+        if (trustAllSocketFactory == null) {
+            log.warn("INSECURE TLS is ENABLED (ecom.scraper.insecure-tls=true) - certificate validation "
+                    + "is disabled for scraping. Never use this in production.");
+            TrustManager[] trustAll = { new X509TrustManager() {
+                public void checkClientTrusted(X509Certificate[] chain, String authType) { }
+                public void checkServerTrusted(X509Certificate[] chain, String authType) { }
+                public X509Certificate[] getAcceptedIssuers() { return new X509Certificate[0]; }
+            }};
+            try {
+                SSLContext ctx = SSLContext.getInstance("TLS");
+                ctx.init(null, trustAll, new java.security.SecureRandom());
+                trustAllSocketFactory = ctx.getSocketFactory();
+            } catch (GeneralSecurityException e) {
+                throw new IllegalStateException("Failed to build insecure SSL context", e);
+            }
+        }
+        return trustAllSocketFactory;
     }
 }

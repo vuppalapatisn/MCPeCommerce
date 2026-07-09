@@ -33,6 +33,14 @@ spring:
 server:
   port: 8080
 
+# OpenAPI / Swagger UI. Docs: /v3/api-docs  UI: /swagger-ui.html
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+
 management:
   endpoints:
     web:
@@ -52,6 +60,10 @@ ecom:
     api-key: ${ECOM_SECURITY_API_KEY:}
   scraper:
     request-timeout-ms: 8000
+    # DEV ONLY: trust all TLS certs to get past a corporate TLS-inspection proxy on a trusted
+    # network. Disables HTTPS certificate validation - never enable in production. Prefer
+    # importing the corporate root CA into the JVM truststore. Override with ECOM_SCRAPER_INSECURE_TLS.
+    insecure-tls: ${ECOM_SCRAPER_INSECURE_TLS:false}
     user-agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
     # How often to re-scrape tracked products to build price history
     tracking-interval-cron: "0 0 */6 * * *"   # every 6 hours

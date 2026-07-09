@@ -48,8 +48,18 @@ public class McpApiKeyAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        // No key configured -> never enforce. Health check must stay open for load balancers.
-        return !enabled || request.getRequestURI().startsWith("/actuator");
+        // No key configured -> never enforce.
+        if (!enabled) {
+            return true;
+        }
+        String uri = request.getRequestURI();
+        // Health check must stay open for load balancers; the API docs / Swagger UI must stay
+        // reachable so the docs page can render (individual /api calls still require the key,
+        // entered via the Swagger "Authorize" button).
+        return uri.startsWith("/actuator")
+                || uri.startsWith("/swagger-ui")
+                || uri.startsWith("/v3/api-docs")
+                || uri.equals("/swagger-ui.html");
     }
 
     @Override
