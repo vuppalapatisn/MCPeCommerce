@@ -6,6 +6,13 @@ A remote MCP server, built with Spring AI + Spring Boot, that exposes tools for:
 - Building and reading price history over time (self-tracked, since no public
   India price-history API exists)
 
+> **Requires Spring AI 1.1+ (pinned in `pom.xml`).** The Streamable-HTTP MCP
+> server transport does not exist in Spring AI 1.0.0 — on 1.0.0 the
+> `protocol: STREAMABLE` setting is silently ignored, the server falls back to
+> legacy SSE, and the `/mcp` endpoint returns 404. Do not downgrade.
+
+For full build/run/publish/connect instructions see [SETUP.md](SETUP.md).
+
 ## ⚠️ Read this before deploying
 
 1. **Scraping these sites likely violates their Terms of Service**, and all
@@ -128,9 +135,20 @@ from your machine, so:
 1. Deploy this app somewhere **publicly reachable over HTTPS** (Render, Fly.io,
    Railway, a VPS behind a reverse proxy with TLS, etc.). A bare HTTP endpoint
    on localhost will not work.
-2. Switch the datasource from H2 to Postgres for anything beyond local testing
-   (the H2 dependency is already in `pom.xml` — just point `spring.datasource.url`
-   at your Postgres instance and remove/ignore the H2 line).
+2. Switch the datasource from H2 to Postgres for anything beyond local testing.
+   Both drivers are already in `pom.xml`, so no dependency changes are needed —
+   just override the datasource via environment variables (the `docker-compose.yml`
+   already wires exactly these):
+
+   ```bash
+   SPRING_DATASOURCE_URL=jdbc:postgresql://<host>:5432/ecom_mcp
+   SPRING_DATASOURCE_USERNAME=ecom
+   SPRING_DATASOURCE_PASSWORD=<password>
+   SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+   SPRING_JPA_HIBERNATE_DDL_AUTO=update
+   ```
+
+   These override the H2 defaults in `application.yml` without editing it.
 3. In Claude: **Customize > Connectors > "+" > Add custom connector**, and enter
    `https://your-deployed-host/mcp` as the URL. No OAuth is configured by
    default in this project — add Spring Security + OAuth2 resource server
