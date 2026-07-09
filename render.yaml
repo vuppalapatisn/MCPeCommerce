@@ -20,6 +20,13 @@ services:
       - key: SERVER_PORT       # Spring Boot binds here; matches Render's default routed port
         value: "10000"
 
+      # Shared secret that protects the /mcp endpoint. generateValue makes Render
+      # create a random value on first deploy; read it in the dashboard
+      # (service -> Environment) and give it to your MCP client. Remove this block
+      # to leave the endpoint unauthenticated.
+      - key: ECOM_SECURITY_API_KEY
+        generateValue: true
+
       # --- Persistent Postgres (optional) ---------------------------------
       # The free instance's filesystem is ephemeral, so the default H2 file DB
       # resets whenever the instance restarts/wakes. For durable price history,

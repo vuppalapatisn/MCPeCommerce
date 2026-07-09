@@ -131,10 +131,34 @@ git push -u origin main
 
 This is a **remote HTTP** server (not stdio), so it must already be running.
 
+### Authentication (optional but recommended for public deploys)
+
+The `/mcp` endpoint is unauthenticated unless you set a shared secret. Set env
+`ECOM_SECURITY_API_KEY` (the Render blueprint auto-generates one) and the server
+then requires that key on every `/mcp` request. `/actuator/health` stays open so
+health checks keep working. When the env var is unset, auth is disabled (handy
+for local dev and tests).
+
+Clients pass the key as either header:
+
+```
+Authorization: Bearer <key>
+X-API-Key: <key>
+```
+
 ### Claude Code (local)
+
+Without auth:
 
 ```bash
 claude mcp add --transport http ecommerce http://localhost:8080/mcp
+```
+
+With auth (add the header):
+
+```bash
+claude mcp add --transport http ecommerce https://<your-host>/mcp \
+  --header "Authorization: Bearer <your-key>"
 ```
 
 Then run `/mcp` inside a session to confirm it connects and lists the tools.
@@ -143,7 +167,11 @@ Equivalent `.mcp.json`:
 ```json
 {
   "mcpServers": {
-    "ecommerce": { "type": "http", "url": "http://localhost:8080/mcp" }
+    "ecommerce": {
+      "type": "http",
+      "url": "https://<your-host>/mcp",
+      "headers": { "Authorization": "Bearer <your-key>" }
+    }
   }
 }
 ```
@@ -176,6 +204,13 @@ Custom connectors connect from Anthropic's cloud, **not** your machine, so
 or Fly.io / Railway / a VPS behind TLS). Then:
 
 **Settings → Connectors → Add custom connector** → URL `https://your-host/mcp`.
+
+> **Note on auth from claude.ai:** the browser custom-connector flow is built
+> around OAuth, so it may not let you attach a static `Authorization` header. The
+> shared-key auth here works cleanly with **Claude Code** (via `--header`). To
+> test from **claude.ai**, either deploy without the key set, or add a full
+> OAuth2 resource server. The Claude Code path is recommended for a quick,
+> secured setup.
 
 Before exposing it publicly:
 
