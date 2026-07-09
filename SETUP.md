@@ -70,6 +70,38 @@ docker compose up --build
 `docker compose` only gives you a local/internal endpoint — see step 5 for
 making it reachable from claude.ai.
 
+## 3b. Publish the image to Docker Hub
+
+Image name: `sudhavuppalapati/mcp-ecommerce-server`.
+
+### Automated (recommended) — GitHub Actions
+
+`.github/workflows/docker-publish.yml` builds, tests, and pushes the image on
+every push to `main` (and on `v*` tags). It just needs two repository secrets —
+**Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret | Value |
+|---|---|
+| `DOCKERHUB_USERNAME` | `sudhavuppalapati` |
+| `DOCKERHUB_TOKEN` | a Docker Hub **access token** (hub.docker.com → Account Settings → Personal access tokens), *not* your password |
+
+Tags produced: `latest` (on `main`), the release tag on `v*` pushes, and a
+short-SHA tag on every build.
+
+### Manual (from a machine with Docker)
+
+```bash
+docker login -u sudhavuppalapati            # paste the access token as the password
+docker build -t sudhavuppalapati/mcp-ecommerce-server:latest .
+docker push sudhavuppalapati/mcp-ecommerce-server:latest
+```
+
+Pull and run it anywhere:
+
+```bash
+docker run -p 8080:8080 -v ecom-data:/app/data sudhavuppalapati/mcp-ecommerce-server:latest
+```
+
 ## 4. Publish to GitHub
 
 If your working changes live on a feature branch (e.g. a Claude Code worktree
