@@ -8,10 +8,9 @@ spring:
         name: india-ecommerce-mcp-server
         version: 1.0.0
         type: SYNC
-        protocol: STREAMABLE      # Streamable HTTP - required for remote/claude.ai usage
-        transport:
-          streamable-http:
-            path: /mcp            # Full URL to register in Claude: https://your-host/mcp
+        protocol: STREAMABLE      # Streamable HTTP - required for remote/claude.ai usage (Spring AI 1.1+)
+        streamable-http:
+          mcp-endpoint: /mcp      # Full URL to register in Claude: https://your-host/mcp
         instructions: >
           Tools for searching products across Indian e-commerce sites (Amazon.in, Flipkart,
           Myntra, Meesho), reading current price and rating, and viewing tracked price history.

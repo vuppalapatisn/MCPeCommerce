@@ -12,9 +12,11 @@ import java.util.regex.Pattern;
  */
 public final class ScraperTextUtils {
 
-    // e.g. 1234 / Rs. 1234 / INR 1234
+    // e.g. 1234 / Rs. 1234 / INR 1234 / \u20B91,299 / INR 1234.50
+    // Integer part is either Indian comma-grouped (1,29,900) or a plain run of digits (1234),
+    // followed by an optional 1-2 digit decimal part.
     private static final Pattern PRICE_PATTERN =
-            Pattern.compile("(?:\u20B9|Rs\\.?|INR)\\s?([0-9]{1,3}(?:,[0-9]{2,3})*(?:\\.[0-9]{1,2})?)");
+            Pattern.compile("(?:\u20B9|Rs\\.?|INR)\\s?((?:[0-9]{1,3}(?:,[0-9]{2,3})+|[0-9]+)(?:\\.[0-9]{1,2})?)");
 
     // "4.3 out of 5" or "4.3 stars" - requires explicit rating context
     private static final Pattern RATING_WITH_CONTEXT_PATTERN =
